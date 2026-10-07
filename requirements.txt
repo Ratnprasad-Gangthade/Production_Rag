@@ -1,0 +1,20 @@
+langchain 
+langchain-core
+langchain-community 
+
+
+## llm provider 
+langchain-groq 
+
+langchain-text-splitters 
+
+## vectore db 
+
+faiss-cpu
+
+## notebook 
+jupyter 
+ipykernel
+
+python-dotenv 
+
