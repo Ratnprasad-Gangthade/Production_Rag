@@ -5,7 +5,7 @@ langchain-community
 
 ## llm provider 
 langchain-groq 
-
+langchain-google-genai
 langchain-text-splitters 
 
 ## vectore db 
