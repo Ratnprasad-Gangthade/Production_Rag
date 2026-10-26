@@ -10,6 +10,6 @@ def split_into_chunks(documents):
         chunk_overlap=config.CHUNK_OVERLAP
     )
 
-    return splitter.split_documents(documents=config.DATA_FILE_PATH)
+    return splitter.split_documents(documents)
 
 print("document splitted")
