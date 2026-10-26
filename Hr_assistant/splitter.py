@@ -1,15 +1,19 @@
-""" step 2: split the document into the smaller chunks for better searchability"""
+"""Step 2: chop the document into small, searchable chunks."""
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from Hr_assistant import config
+
+from Hr_assistant import config 
+from Hr_assistant.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 def split_into_chunks(documents):
-    """ spli the docuemnt into smaller parts for better searchablility """
-    splitter=RecursiveCharacterTextSplitter(
+    """Split documents into small overlapping chunks."""
+    text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=config.CHUNK_SIZE,
-        chunk_overlap=config.CHUNK_OVERLAP
+        chunk_overlap=config.CHUNK_OVERLAP,
     )
-
-    return splitter.split_documents(documents)
-
-print("document splitted")
+    chunks = text_splitter.split_documents(documents)
+    logger.info("Split document(s) into %d chunk(s)", len(chunks))
+    return chunks
