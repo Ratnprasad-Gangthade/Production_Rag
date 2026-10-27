@@ -18,12 +18,13 @@ DATA_FILE_PATH = os.path.join("data", "hr_policy.txt")
 VECTOR_STORE_PATH=os.path.join("data", "faiss_index")
 
 ## MODELS 
-# LLM and EMBEDING MODEL 
-
-
 LLM_MODEL_NAME = "openai/gpt-oss-20b"
 
+# LLM and EMBEDING MODEL 
 EMBEDDING_MODEL_NAME = "gemini-embedding-2"
+
+# GUARD MODEL 
+GUARD_MODEL_NAME = "openai/gpt-oss-safeguard-20b"
 
 ## CHUNK / TEXT SPLITTING CONFIG 
 
