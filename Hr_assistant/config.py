@@ -17,6 +17,13 @@ DATA_FILE_PATH = os.path.join("data", "hr_policy.txt")
 
 VECTOR_STORE_PATH=os.path.join("data", "faiss_index")
 
+# cloud vector db
+QDRANT_API_KEY=os.getenv("QDRANT_API_KEY")
+QDRANT_URL= os.getenv("QDRANT_URL")
+
+QDRANT_COLLECTION_NAME=os.getenv("QDRANT_COLLECTION_NAME", "hr_policy")
+
+
 ## MODELS 
 LLM_MODEL_NAME = "openai/gpt-oss-20b"
 

@@ -9,7 +9,8 @@ langchain-google-genai
 langchain-text-splitters 
 
 ## vectore db 
-
+langchain-qdrant
+qdrant-client
 faiss-cpu
 
 ## notebook 
