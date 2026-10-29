@@ -68,7 +68,6 @@ def ask(agent, question: str ) -> str:
     if not input_is_safe:
         return REFUSAL_MESSAGE
 
-
     response = agent.invoke({"messages":[{"role" : "user", "content":question}]}) 
     answer= response["messages"][-1].content
     logger.info("Final answer : '%s' ", answer)
