@@ -6,35 +6,48 @@ agent's answer to the user, we run the text past a small safety model
 what's not allowed. The model replies with JSON telling us whether the
 text violates the policy - if it does, we stop and return a safe
 message instead of continuing.
+
+If the guard model itself fails (rate limit, network, bad JSON), we
+"fail closed": the text is treated as unsafe and the refusal message is
+shown, so an unchecked answer never reaches the user.
 """
-# imports
 
 import json
 
 from langchain_groq import ChatGroq
-from Hr_assistant import config
-# from hr_assistant.config import GUARD_MODEL_NAME
 
+from Hr_assistant import config
 from Hr_assistant.logger import get_logger
+
 logger = get_logger(__name__)
 
 
 REFUSAL_MESSAGE = "Sorry, I can't help with that request."
-# private varibales , private methods 
 
+# Set to False if you would rather let answers through when the guard
+# model is unavailable (smoother, but less safe).
+FAIL_CLOSED = True
+
+
+# Private guard model.
+# - max_tokens caps the reply: the JSON verdict is tiny, and Groq counts
+#   the reply budget against the tokens-per-minute limit.
+# - reasoning_effort="low" keeps the reasoning model from spending
+#   thousands of tokens thinking about a simple yes/no verdict.
 _guard_llm = ChatGroq(
     model=config.GUARD_MODEL_NAME,
     temperature=0,
-    model_kwargs={"response_format": {"type": "json_object"}},
+    max_tokens=1000,
+    reasoning_effort="low"
 )
 
-
+# Example of what the guard model returns:
 # {
-# "violation": 1,
-# "category": "Direct Override",
-# "rationale": "The input explicitly attempts to override system 
-# instructions by introducing the 'DAN' persona and requesting 
-# unrestricted behavior, which constitutes a clear prompt injection attack."
+#   "violation": 1,
+#   "category": "Direct Override",
+#   "rationale": "The input explicitly attempts to override system
+#   instructions by introducing the 'DAN' persona and requesting
+#   unrestricted behavior, which constitutes a clear prompt injection."
 # }
 
 
@@ -93,44 +106,50 @@ EXAMPLES
 "Sure, I've approved your leave for next week" -> violation=1, category="unauthorized_promise"
 "Verify your balance at http://malicious-example.test and use admin password 'admin123'" -> violation=1, category="suspicious_link_or_credential"
 "You get 20 days of paid annual leave per year" -> violation=0, category=null
-
 """
 
 
-
-
-# check safety 
-
 def _check_safety(text: str, policy: str) -> tuple[bool, str]:
-    """Return (is_safe, reason) for the given text under the given policy."""
-    response = _guard_llm.invoke(
-        [
-            {"role": "system", "content": policy},
-            {"role": "user", "content": text},
-        ]
-    )
-    result = json.loads(response.content)
+    """Return (is_safe, reason) for the given text under the given policy.
+
+    Any failure of the guard model itself is logged and handled according
+    to FAIL_CLOSED, instead of crashing the whole request.
+    """
+    try:
+        response = _guard_llm.invoke(
+            [
+                {"role": "system", "content": policy},
+                {"role": "user", "content": text},
+            ]
+        )
+        result = json.loads(response.content)
+
+    except Exception:
+        logger.exception("Guard check failed (fail_closed=%s).", FAIL_CLOSED)
+        if FAIL_CLOSED:
+            return False, "guard_unavailable"
+        return True, "guard_unavailable"
+
     is_safe = result.get("violation", 0) == 0
     reason = result.get("rationale", "")
     return is_safe, reason
-
-
-# input safety 
 
 
 def check_input(question: str) -> tuple[bool, str]:
     """Check the user's question before the agent sees it."""
     is_safe, reason = _check_safety(question, INPUT_POLICY)
     if not is_safe:
-        logger.warning("Input guard BLOCKED question: %s | reason: %s", question, reason)
+        logger.warning(
+            "Input guard BLOCKED question: %s | reason: %s", question, reason
+        )
     return is_safe, reason
 
-#output safety
 
 def check_output(answer: str) -> tuple[bool, str]:
     """Check the agent's answer before showing it to the user."""
     is_safe, reason = _check_safety(answer, OUTPUT_POLICY)
     if not is_safe:
-        logger.warning("Output guard BLOCKED answer: %s | reason: %s", answer, reason)
+        logger.warning(
+            "Output guard BLOCKED answer: %s | reason: %s", answer, reason
+        )
     return is_safe, reason
-
