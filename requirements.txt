@@ -8,6 +8,13 @@ langchain-groq
 langchain-google-genai
 langchain-text-splitters 
 
+
+## llm-gateway  
+langchain-openai
+portkey-ai 
+
+## every gateways--> provide openai compatible code 
+
 ## vectore db 
 langchain-qdrant
 qdrant-client

@@ -10,6 +10,7 @@ load_dotenv(override=True)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+PORTKEY_API_KEY = os.getenv("PORTKEY_API_KEY")
 
 ## DEFINE PATH - DATA / VECTOR STORE 
 
@@ -32,6 +33,10 @@ EMBEDDING_MODEL_NAME = "gemini-embedding-2"
 
 # GUARD MODEL 
 GUARD_MODEL_NAME = "openai/gpt-oss-safeguard-20b"
+
+#GATEWAY 
+
+PORTKEY_API_KEY = os.getenv("PORTKEY_API_KEY")
 
 ## CHUNK / TEXT SPLITTING CONFIG 
 
