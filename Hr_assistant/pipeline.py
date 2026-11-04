@@ -17,6 +17,7 @@ from Hr_assistant.vector_store import (
     )
 from Hr_assistant.guardrails import REFUSAL_MESSAGE , check_input , check_output
 
+from Hr_assistant.tracing import check_langsmith_tracing
 
 
 from Hr_assistant.logger import get_logger
@@ -46,6 +47,7 @@ def build_hr_assistant(file_path: str = config.DATA_FILE_PATH):
     """Build the full RAG agent, ready to answer questions."""
     logger.info("Building Hr assistant ")
     config.check_api_keys()
+    check_langsmith_tracing()
 
     vector_store = build_vector_store_for_document(file_path)
     retriever= get_retriever(vector_store)
